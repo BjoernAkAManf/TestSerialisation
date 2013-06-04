@@ -1,4 +1,4 @@
-package tk.manf.testserialisation;
+package tk.manf.serialisation.example;
 
 import tk.manf.serialisation.annotations.Property;
 import tk.manf.serialisation.SerialisationType;

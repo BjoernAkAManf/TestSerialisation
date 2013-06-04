@@ -1,13 +1,9 @@
-package tk.manf.testserialisation;
+package tk.manf.serialisation.example;
 
-import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.java.JavaPlugin;
 import tk.manf.serialisation.ObjectSerialiser;
-import tk.manf.serialisation.SerialisationException;
 
 public class TestSerialisationPlugin extends JavaPlugin {
     private TestEntity entity;
