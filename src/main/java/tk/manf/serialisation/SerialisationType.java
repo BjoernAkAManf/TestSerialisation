@@ -2,7 +2,10 @@ package tk.manf.serialisation;
 
 import tk.manf.serialisation.handler.SerialisationHandler;
 import tk.manf.serialisation.handler.flatfile.YAMLSerialisationHandler;
-
+/**
+ * 
+ * 
+ */
 public enum SerialisationType {
     FLATFILE_YAML(new YAMLSerialisationHandler(3));
 

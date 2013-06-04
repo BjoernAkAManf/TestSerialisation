@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.util.HashMap;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
-import tk.manf.serialisation.annotations.Identification;
 import tk.manf.serialisation.annotations.Unit;
 import tk.manf.serialisation.handler.SerialisationHandler;
 

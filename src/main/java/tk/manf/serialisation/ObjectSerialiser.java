@@ -12,19 +12,42 @@ import org.bukkit.plugin.java.JavaPlugin;
 import tk.manf.serialisation.annotations.Identification;
 import tk.manf.serialisation.handler.SerialisationHandler;
 
-public class ObjectSerialiser {
+public final class ObjectSerialiser {
     private File dataFolder;
-    private Logger logger;
-    
+    //Still don't like SuppressWarnings comparable with Warnings
+    @SuppressWarnings("NonConstantLogger")
+    private final Logger logger;
+
+    /**
+     * Initialises Object Serialiser
+     * @param plugin 
+     */
     public ObjectSerialiser(JavaPlugin plugin) {
         this.dataFolder = plugin.getDataFolder();
         this.logger = plugin.getLogger();
     }
 
+    /**
+     * 
+     * @param o
+     * @throws IllegalArgumentException
+     * @throws IllegalAccessException
+     * @throws IOException
+     * @throws SerialisationException 
+     */
     public void save(Object o) throws IllegalArgumentException, IllegalAccessException, IOException, SerialisationException {
         save(o, false);
     }
 
+    /**
+     * 
+     * @param o
+     * @param warn
+     * @throws IllegalArgumentException
+     * @throws IllegalAccessException
+     * @throws IOException
+     * @throws SerialisationException 
+     */
     public void save(Object o, boolean warn) throws IllegalArgumentException, IllegalAccessException, IOException, SerialisationException {
         Unit unit = o.getClass().getAnnotation(Unit.class);
         if (unit == null) {
@@ -38,9 +61,7 @@ public class ObjectSerialiser {
                 if (f.getAnnotation(Identification.class) != null) {
                     id = f.get(o).toString();
                     if (!Modifier.isFinal(f.getModifiers())) {
-                        if (warn) {
-                            logger.log(Level.INFO, "Identifikation {0} is not final!", f.getName());
-                        }
+                        logger.log(Level.INFO, "Identifikation {0} is not final! NAG Developers", f.getName());
                     }
                 } else {
                     throw new SerialisationException("Identification not found! Found " + f.getName());
@@ -48,24 +69,23 @@ public class ObjectSerialiser {
             }
             Property prop = f.getAnnotation(Property.class);
             /*
-             * NASTY BLUB CODE
+             * NASTY BLUB CODE - Gonna rewrite this!
              */
             if (prop == null) {
                 if (warn) {
-                    logger.log(Level.INFO, "Field of {0} has no Properties({1})", new Object[]{f.getName(), f.getClass().getName()});
+                    logger.log(Level.INFO, "Field {0} is no Propertie({1})", new Object[]{f.getName(), f.getClass().getName()});
                 }
                 continue;
             }
 
             if (warn) {
                 if (prop.name().length() == 0) {
-                    logger.log(Level.INFO, "Field of {0} has no Name using Field name!", f.getName());
+                    logger.log(Level.INFO, "Field {0} has no name. Using field name!", f.getName());
                 }
             }
             /*
              * END NASTY CODE
              */
-
             handler.save(unit, dataFolder, id, prop.name().length() == 0 ? f.getName() : prop.name(), f.get(o));
             f.setAccessible(false);
         }

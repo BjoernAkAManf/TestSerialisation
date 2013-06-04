@@ -9,7 +9,19 @@ import tk.manf.serialisation.SerialisationType;
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Unit {
+    /**
+     * 
+     * @return 
+     */
     public String name();
+    /**
+     * 
+     * @return 
+     */
     public boolean isStatic() default true;
+    /**
+     * 
+     * @return 
+     */
     public SerialisationType handler();
 }

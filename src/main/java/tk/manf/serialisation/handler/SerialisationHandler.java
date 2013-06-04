@@ -4,6 +4,10 @@ import java.io.File;
 import java.io.IOException;
 import tk.manf.serialisation.annotations.Unit;
 
+/**
+ * 
+ * 
+ */
 public interface SerialisationHandler {
     /**
      * Saves given Unit to Memory
