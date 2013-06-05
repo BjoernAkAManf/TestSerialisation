@@ -61,7 +61,7 @@ public final class ObjectSerialiser {
                 if (f.getAnnotation(Identification.class) != null) {
                     id = f.get(o).toString();
                     if (!Modifier.isFinal(f.getModifiers())) {
-                        logger.log(Level.INFO, "Identifikation {0} is not final! NAG Developers", f.getName());
+                        logger.log(Level.INFO, "Identification {0} is not final! NAG Developers", f.getName());
                     }
                 } else {
                     throw new SerialisationException("Identification not found! Found " + f.getName());
