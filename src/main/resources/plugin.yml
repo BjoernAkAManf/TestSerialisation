@@ -3,5 +3,3 @@ version: ${project.version}
 description: ${project.description}
 author: manf
 main: ${main.class}
-commands:
- serial:
