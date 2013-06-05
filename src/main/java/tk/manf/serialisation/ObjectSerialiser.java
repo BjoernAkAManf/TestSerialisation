@@ -20,7 +20,8 @@ public final class ObjectSerialiser {
 
     /**
      * Initialises Object Serialiser
-     * @param plugin 
+     * <p/>
+     * @param plugin
      */
     public ObjectSerialiser(JavaPlugin plugin) {
         this.dataFolder = plugin.getDataFolder();
@@ -28,25 +29,27 @@ public final class ObjectSerialiser {
     }
 
     /**
-     * 
+     *
      * @param o
+     * <p/>
      * @throws IllegalArgumentException
      * @throws IllegalAccessException
      * @throws IOException
-     * @throws SerialisationException 
+     * @throws SerialisationException
      */
     public void save(Object o) throws IllegalArgumentException, IllegalAccessException, IOException, SerialisationException {
         save(o, false);
     }
 
     /**
-     * 
+     *
      * @param o
      * @param warn
+     * <p/>
      * @throws IllegalArgumentException
      * @throws IllegalAccessException
      * @throws IOException
-     * @throws SerialisationException 
+     * @throws SerialisationException
      */
     public void save(Object o, boolean warn) throws IllegalArgumentException, IllegalAccessException, IOException, SerialisationException {
         Unit unit = o.getClass().getAnnotation(Unit.class);
@@ -61,7 +64,7 @@ public final class ObjectSerialiser {
                 if (f.getAnnotation(Identification.class) != null) {
                     id = f.get(o).toString();
                     if (!Modifier.isFinal(f.getModifiers())) {
-                        logger.log(Level.INFO, "Identifikation {0} is not final! NAG Developers", f.getName());
+                        logger.log(Level.INFO, "Identification {0} is not final! NAG Developers", f.getName());
                     }
                 } else {
                     throw new SerialisationException("Identification not found! Found " + f.getName());
@@ -90,5 +93,14 @@ public final class ObjectSerialiser {
             f.setAccessible(false);
         }
         handler.save(unit, dataFolder, id);
+    }
+
+    public Object[] load(Class<?> type) throws SerialisationException, IllegalAccessException, InstantiationException {
+        Unit unit = type.getAnnotation(Unit.class);
+        if (unit == null) {
+            throw new SerialisationException("Type is no Unit");
+        }
+        SerialisationHandler handler = unit.handler().getHandler();
+        return handler.load(unit, dataFolder);
     }
 }
