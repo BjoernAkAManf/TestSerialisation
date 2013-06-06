@@ -2,6 +2,7 @@ package tk.manf.serialisation.handler.flatfile;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -42,15 +43,14 @@ public class YAMLSerialisationHandler implements SerialisationHandler {
         cacheConfig(unit.isStatic(), id, unit.name(), config);
     }
 
-    public Object[] load(Class<?> c, Unit unit, File folder) throws IllegalAccessException, InstantiationException {
+    public <T> List<T> load(Class<T> c, Unit unit, File folder) throws IllegalAccessException, InstantiationException {
         FileConfiguration config;
-        Object[] tmp;
+        List<T> tmp;
         if (unit.isStatic()) {
-            config = loadConfig(folder, unit.name(), unit.name());
-            tmp = new Object[1];
+            tmp = new ArrayList<T>(1);
             // THROW
             try {
-                tmp[0] = toObject(c, config);
+                tmp.add(toObject(c, loadConfig(folder, unit.name(), unit.name())));
             } catch (IllegalArgumentException ex) {
                 Logger.getLogger(YAMLSerialisationHandler.class.getName()).log(Level.SEVERE, null, ex);
             } catch (InvocationTargetException ex) {
@@ -60,12 +60,11 @@ public class YAMLSerialisationHandler implements SerialisationHandler {
             }
         } else {
             final File saves = new File(folder, unit.name());
-            tmp = new Object[saves.listFiles().length];
-            int i = 0;
-            for(File f:saves.listFiles()) {
+            tmp = new ArrayList<T>(saves.listFiles().length);
+            for (File f : saves.listFiles()) {
                 //THROW
                 try {
-                    tmp[i] = toObject(c, loadConfig(folder, f.getName(), unit.name()));
+                    tmp.add(toObject(c, loadConfig(folder, f.getName(), unit.name())));
                 } catch (IllegalArgumentException ex) {
                     Logger.getLogger(YAMLSerialisationHandler.class.getName()).log(Level.SEVERE, null, ex);
                 } catch (InvocationTargetException ex) {
@@ -73,11 +72,9 @@ public class YAMLSerialisationHandler implements SerialisationHandler {
                 } catch (SerialisationException ex) {
                     Logger.getLogger(YAMLSerialisationHandler.class.getName()).log(Level.SEVERE, null, ex);
                 }
-                i++;
             }
         }
         return tmp;
-
     }
 
     /**
@@ -140,8 +137,8 @@ public class YAMLSerialisationHandler implements SerialisationHandler {
         cache.put(id, config);
     }
 
-    private static Object toObject(Class<?> c, FileConfiguration config) throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, SerialisationException {
-        Object o = null;
+    private static <T> T toObject(Class<T> c, FileConfiguration config) throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, SerialisationException {
+        T o = null;
         for (Constructor<?> constr : c.getConstructors()) {
             if (constr.getAnnotation(InitiationConstructor.class) == null) {
                 continue;
@@ -155,7 +152,7 @@ public class YAMLSerialisationHandler implements SerialisationHandler {
                 }
                 params.add(config.get(param.name()));
             }
-            o = constr.newInstance(params.toArray(new Object[params.size()]));
+            o = c.cast(constr.newInstance(params.toArray(new Object[params.size()])));
         }
         if (o == null) {
             throw new SerialisationException("No Object initiated");

@@ -6,6 +6,7 @@ import tk.manf.serialisation.annotations.Unit;
 import tk.manf.serialisation.annotations.Property;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -95,12 +96,11 @@ public final class ObjectSerialiser {
         handler.save(unit, dataFolder, id);
     }
 
-    public Object[] load(Class<?> type) throws SerialisationException, IllegalAccessException, InstantiationException {
+    public <T> List<T> load(Class<T> type) throws SerialisationException, IllegalAccessException, InstantiationException {
         Unit unit = type.getAnnotation(Unit.class);
         if (unit == null) {
             throw new SerialisationException("Type is no Unit");
         }
-        SerialisationHandler handler = unit.handler().getHandler();
-        return handler.load(type, unit, dataFolder);
+        return unit.handler().getHandler().load(type, unit, dataFolder);
     }
 }

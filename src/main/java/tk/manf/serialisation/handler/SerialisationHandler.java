@@ -2,6 +2,7 @@ package tk.manf.serialisation.handler;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 import tk.manf.serialisation.annotations.Unit;
 
 /**
@@ -27,5 +28,5 @@ public interface SerialisationHandler {
      */
     public void save(Unit unit, File dataFolder, String id, String string, Object get);
 
-    public Object[] load(Class<?> c, Unit unit, File dataFolder) throws IllegalAccessException, InstantiationException;
+    public <T> List<T> load(Class<T> c, Unit unit, File dataFolder) throws IllegalAccessException, InstantiationException;
 }

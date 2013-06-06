@@ -1,7 +1,7 @@
 package tk.manf.serialisation.example;
 
+import java.util.List;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -15,13 +15,13 @@ public class TestSerialisationPlugin extends JavaPlugin {
     public void onEnable() {
         try {
             serial = new ObjectSerialiser(this);
-            Object[] o = serial.load(TestEntity.class);
-            if(o == null || o.length == 0) {
+            List<TestEntity> o = serial.load(TestEntity.class);
+            if(o == null || o.isEmpty()) {
                 System.out.println("Loading failed!");
                 entity = new TestEntity("Björn");
             } else {
-                if(o[0] instanceof TestEntity) {
-                    entity = (TestEntity) o[0];
+                if(o.get(0) instanceof TestEntity) {
+                    entity = (TestEntity) o.get(0);
                 }
             }
         } catch (Exception ex) {
