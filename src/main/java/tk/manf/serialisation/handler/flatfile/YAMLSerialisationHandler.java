@@ -2,11 +2,19 @@ package tk.manf.serialisation.handler.flatfile;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
-import sun.misc.Unsafe;
+import tk.manf.serialisation.SerialisationException;
+import tk.manf.serialisation.annotations.InitiationConstructor;
+import tk.manf.serialisation.annotations.Parameter;
 import tk.manf.serialisation.annotations.Property;
 import tk.manf.serialisation.annotations.Unit;
 import tk.manf.serialisation.handler.SerialisationHandler;
@@ -34,16 +42,39 @@ public class YAMLSerialisationHandler implements SerialisationHandler {
         cacheConfig(unit.isStatic(), id, unit.name(), config);
     }
 
-    public Object[] load(Unit unit, File folder) throws IllegalAccessException, InstantiationException {
+    public Object[] load(Class<?> c, Unit unit, File folder) throws IllegalAccessException, InstantiationException {
         FileConfiguration config;
         Object[] tmp;
         if (unit.isStatic()) {
             config = loadConfig(folder, unit.name(), unit.name());
             tmp = new Object[1];
-            tmp[0] = toObject(unit.getClass(), config);
+            // THROW
+            try {
+                tmp[0] = toObject(c, config);
+            } catch (IllegalArgumentException ex) {
+                Logger.getLogger(YAMLSerialisationHandler.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (InvocationTargetException ex) {
+                Logger.getLogger(YAMLSerialisationHandler.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (SerialisationException ex) {
+                Logger.getLogger(YAMLSerialisationHandler.class.getName()).log(Level.SEVERE, null, ex);
+            }
         } else {
-            File f = new File(folder, unit.name());
-            tmp = null;
+            final File saves = new File(folder, unit.name());
+            tmp = new Object[saves.listFiles().length];
+            int i = 0;
+            for(File f:saves.listFiles()) {
+                //THROW
+                try {
+                    tmp[i] = toObject(c, loadConfig(folder, f.getName(), unit.name()));
+                } catch (IllegalArgumentException ex) {
+                    Logger.getLogger(YAMLSerialisationHandler.class.getName()).log(Level.SEVERE, null, ex);
+                } catch (InvocationTargetException ex) {
+                    Logger.getLogger(YAMLSerialisationHandler.class.getName()).log(Level.SEVERE, null, ex);
+                } catch (SerialisationException ex) {
+                    Logger.getLogger(YAMLSerialisationHandler.class.getName()).log(Level.SEVERE, null, ex);
+                }
+                i++;
+            }
         }
         return tmp;
 
@@ -109,17 +140,35 @@ public class YAMLSerialisationHandler implements SerialisationHandler {
         cache.put(id, config);
     }
 
-    private static Object toObject(Class<?> c, FileConfiguration config) throws InstantiationException, IllegalAccessException {
-        Object o = Unsafe.getUnsafe().allocateInstance(c);
-        for (Field f : c.getDeclaredFields()) {
-            f.setAccessible(true);
-            Property prop = f.getAnnotation(Property.class);
-            if (prop == null) {
+    private static Object toObject(Class<?> c, FileConfiguration config) throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, SerialisationException {
+        Object o = null;
+        for (Constructor<?> constr : c.getConstructors()) {
+            if (constr.getAnnotation(InitiationConstructor.class) == null) {
                 continue;
             }
-            f.set(o, config.get(prop.name().length() == 0 ? f.getName() : prop.name()));
-            f.setAccessible(false);
+            final List<Object> params = new ArrayList<Object>(constr.getParameterTypes().length);
+            for (Class<?> type : constr.getParameterTypes()) {
+                Parameter param = type.getAnnotation(Parameter.class);
+                if (param == null) {
+                    params.add(type.isPrimitive() ? type.newInstance() : null);
+                    continue;
+                }
+                params.add(config.get(param.name()));
+            }
+            o = constr.newInstance(params.toArray(new Object[params.size()]));
         }
-        return null;
+        if (o == null) {
+            throw new SerialisationException("No Object initiated");
+        }
+        for (Field f : c.getDeclaredFields()) {
+            if (f.isAccessible()) {
+                Property prop = f.getAnnotation(Property.class);
+                if (prop == null) {
+                    continue;
+                }
+                f.set(o, config.get(prop.name().length() == 0 ? f.getName() : prop.name()));
+            }
+        }
+        return o;
     }
 }

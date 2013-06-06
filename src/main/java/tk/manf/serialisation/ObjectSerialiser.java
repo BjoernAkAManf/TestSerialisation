@@ -101,6 +101,6 @@ public final class ObjectSerialiser {
             throw new SerialisationException("Type is no Unit");
         }
         SerialisationHandler handler = unit.handler().getHandler();
-        return handler.load(unit, dataFolder);
+        return handler.load(type, unit, dataFolder);
     }
 }

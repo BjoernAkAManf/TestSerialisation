@@ -11,7 +11,8 @@
     <url>http://maven.apache.org</url>
 
     <properties>
-        <main.class>tk.manf.serialisation.SerialisationAPIPlugin</main.class>
+        <!--<main.class>tk.manf.serialisation.SerialisationAPIPlugin</main.class>-->
+        <main.class>tk.manf.serialisation.example.TestSerialisationPlugin</main.class>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 

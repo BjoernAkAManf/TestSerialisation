@@ -27,5 +27,5 @@ public interface SerialisationHandler {
      */
     public void save(Unit unit, File dataFolder, String id, String string, Object get);
 
-    public Object[] load(Unit unit, File dataFolder) throws IllegalAccessException, InstantiationException;
+    public Object[] load(Class<?> c, Unit unit, File dataFolder) throws IllegalAccessException, InstantiationException;
 }
