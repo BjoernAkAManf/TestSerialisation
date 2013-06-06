@@ -13,6 +13,10 @@ import org.bukkit.plugin.java.JavaPlugin;
 import tk.manf.serialisation.annotations.Identification;
 import tk.manf.serialisation.handler.SerialisationHandler;
 
+/**
+ * 
+ * @author Björn
+ */
 public final class ObjectSerialiser {
     private File dataFolder;
     //Still don't like SuppressWarnings comparable with Warnings

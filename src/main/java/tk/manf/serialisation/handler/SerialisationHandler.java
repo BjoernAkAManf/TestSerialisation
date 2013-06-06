@@ -28,5 +28,15 @@ public interface SerialisationHandler {
      */
     public void save(Unit unit, File dataFolder, String id, String string, Object get);
 
+    /**
+     * Loads current Units from Memory
+     * @param <T>
+     * @param c
+     * @param unit
+     * @param dataFolder
+     * @return
+     * @throws IllegalAccessException
+     * @throws InstantiationException 
+     */
     public <T> List<T> load(Class<T> c, Unit unit, File dataFolder) throws IllegalAccessException, InstantiationException;
 }

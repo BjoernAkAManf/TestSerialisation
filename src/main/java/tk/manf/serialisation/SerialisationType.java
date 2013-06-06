@@ -1,25 +1,42 @@
 package tk.manf.serialisation;
 
 import tk.manf.serialisation.handler.SerialisationHandler;
-import tk.manf.serialisation.handler.flatfile.YAMLSerialisationHandler;
+
 /**
- * 
- * 
+ * Serialisation Types that a Unit can choose+
+ * @author Björn
  */
 public enum SerialisationType {
-    FLATFILE_YAML(new YAMLSerialisationHandler(3));
+    /**
+     * Serialisation for YAML Files
+     */
+    FLATFILE_YAML();
 
-    private SerialisationType(SerialisationHandler handler) {
-        this.handler = handler;
+    /**
+     * Loading of SerialisationType
+     */
+    private SerialisationType() {
     }
 
+    /**
+     * Gets current Handler for Serialisation Type
+     * @return Serialisation Type
+     */
     public SerialisationHandler getHandler() {
         return handler;
     }
     
+    /**
+     * Sets new Serialisation Handler for Handling
+     * Possible to add any custome Handler by other Plugins
+     * @param handler handler
+     */
     public void setSerialisationHandler(SerialisationHandler handler) {
         this.handler = handler;
     }  
     
+    /**
+     * Handler for Serialisation
+     */
     private SerialisationHandler handler;
 }
