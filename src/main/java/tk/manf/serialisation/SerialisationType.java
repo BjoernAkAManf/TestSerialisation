@@ -3,8 +3,9 @@ package tk.manf.serialisation;
 import tk.manf.serialisation.handler.SerialisationHandler;
 
 /**
- * Serialisation Types that a Unit can choose+
- * @author Björn
+ * Serialisation Types for Unit
+ * 
+ * @author Björn 'manf' Heinrichs
  */
 public enum SerialisationType {
     /**

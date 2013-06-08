@@ -2,7 +2,8 @@ package tk.manf.serialisation;
 
 /**
  * Generic Exception thrown whenever a serialisation fails
- * @author Björn
+ * 
+ * @author Björn 'manf' Heinrichs
  */
 public final class SerialisationException extends Exception{
     /**

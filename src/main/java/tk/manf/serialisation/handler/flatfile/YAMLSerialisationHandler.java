@@ -2,15 +2,12 @@ package tk.manf.serialisation.handler.flatfile;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import tk.manf.serialisation.SerialisationException;
@@ -20,13 +17,34 @@ import tk.manf.serialisation.annotations.Property;
 import tk.manf.serialisation.annotations.Unit;
 import tk.manf.serialisation.handler.SerialisationHandler;
 
+/**
+ * YAML Serialisation Handler for Bukkits FileConfiguration
+ * 
+ * @author Björn 'manf' Heinrichs
+ */
 public class YAMLSerialisationHandler implements SerialisationHandler {
+    /**
+     * Configuration Cache
+     */
     private static HashMap<String, FileConfiguration> cache;
 
-    public YAMLSerialisationHandler(int opacity) {
-        cache = new HashMap<String, FileConfiguration>(opacity);
+    /**
+     * Inintialises a new YAMLSerialisationHandler with capacity
+     * @param opacity the initial capacity.
+     */
+    public YAMLSerialisationHandler(int capacity) {
+        cache = new HashMap<String, FileConfiguration>(capacity);
     }
 
+    /**
+     * Saves given Unit to Memory
+     * 
+     * @param unit Unit
+     * @param folder DataFolder of Plugin
+     * @param id id of Unit for non static Units
+     * 
+     * @throws IOException 
+     */
     public void save(Unit unit, File folder, String id) throws IOException {
         FileConfiguration config = loadConfig(unit, folder, id);
         File f = new File(folder, unit.name());
@@ -37,41 +55,44 @@ public class YAMLSerialisationHandler implements SerialisationHandler {
         cache.remove(unit.isStatic() ? unit.name() : unit.name() + "-" + id);
     }
 
+    /**
+     * Saves current Value to Key in the Cache
+     * 
+     * @param unit Unit 
+     * @param folder DataFolde of Plugin
+     * @param id ID of Plugin
+     * @param key Key
+     * @param value Value to save
+     */
     public void save(Unit unit, File folder, String id, String key, Object value) {
         FileConfiguration config = loadConfig(unit, folder, id);
         config.set(key, value);
-        cacheConfig(unit.isStatic(), id, unit.name(), config);
+        cacheConfig(unit, id, config);
     }
 
-    public <T> List<T> load(Class<T> c, Unit unit, File folder) throws IllegalAccessException, InstantiationException {
-        FileConfiguration config;
+    /**
+     * Loads current Units from Memory
+     *
+     * @param c Class of Unit
+     * @param unit Unit
+     * @param dataFolder dataFolder of Plugin
+     * 
+     * @return all Units
+     * 
+     * @throws SerialisationException if no Object was initiated, caused without an InitiationConstructor or if an InstantiationException is thrown. 
+     * @throws InvocationTargetException if an Error in the Construcor of the Object occured
+     * @throws IllegalAccessException if any access is denied
+     */
+    public <T> List<T> load(Class<T> c, Unit unit, File folder) throws SerialisationException, InvocationTargetException, IllegalAccessException {
         List<T> tmp;
         if (unit.isStatic()) {
             tmp = new ArrayList<T>(1);
-            // THROW
-            try {
-                tmp.add(toObject(c, loadConfig(folder, unit.name(), unit.name())));
-            } catch (IllegalArgumentException ex) {
-                Logger.getLogger(YAMLSerialisationHandler.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (InvocationTargetException ex) {
-                Logger.getLogger(YAMLSerialisationHandler.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (SerialisationException ex) {
-                Logger.getLogger(YAMLSerialisationHandler.class.getName()).log(Level.SEVERE, null, ex);
-            }
+            tmp.add(toObject(c, loadConfig(unit, folder, null)));
         } else {
             final File saves = new File(folder, unit.name());
             tmp = new ArrayList<T>(saves.listFiles().length);
             for (File f : saves.listFiles()) {
-                //THROW
-                try {
-                    tmp.add(toObject(c, loadConfig(folder, f.getName(), unit.name())));
-                } catch (IllegalArgumentException ex) {
-                    Logger.getLogger(YAMLSerialisationHandler.class.getName()).log(Level.SEVERE, null, ex);
-                } catch (InvocationTargetException ex) {
-                    Logger.getLogger(YAMLSerialisationHandler.class.getName()).log(Level.SEVERE, null, ex);
-                } catch (SerialisationException ex) {
-                    Logger.getLogger(YAMLSerialisationHandler.class.getName()).log(Level.SEVERE, null, ex);
-                }
+                tmp.add(toObject(c, loadConfig(folder, f.getName(), unit.name())));
             }
         }
         return tmp;
@@ -80,11 +101,11 @@ public class YAMLSerialisationHandler implements SerialisationHandler {
     /**
      * Loads the Config
      * <p/>
-     * @param folder
-     * @param id
-     * @param name
-     *               <p/>
-     * @return
+     * @param folder DataFolder of Plugin
+     * @param id id of Unit
+     * @param name Name of Unit
+     * <p/>
+     * @return Configuration
      */
     private static FileConfiguration loadConfig(Unit unit, File folder, String id) {
         if (unit.isStatic()) {
@@ -94,13 +115,15 @@ public class YAMLSerialisationHandler implements SerialisationHandler {
     }
 
     /**
-     * Loads given Config
+     * Loads given Config from Cache or File
      * <p/>
-     * @param folder
-     * @param id
-     * @param name
-     *               <p/>
-     * @return
+     * @param folder DataFolder of Plugin
+     * @param id id of Unit
+     * @param name Name of Unit
+     * <p/>
+     * @return Configuration
+     *
+     * @throws IllegalArgumentException if no Configuration could be loaded
      */
     private static FileConfiguration loadConfig(File folder, String id, String name) {
         if (cache.containsKey(id)) {
@@ -110,25 +133,25 @@ public class YAMLSerialisationHandler implements SerialisationHandler {
     }
 
     /**
-     * Saves non-static Config
+     * Saves Configurations in Cache
      * <p/>
-     * @param id
-     * @param name
-     * @param config
+     * @param Unit unit
+     * @param id id of Unit
+     * @param config Configuration that saved current Values of Object
      */
-    private static void cacheConfig(boolean isStatic, String id, String name, FileConfiguration config) {
-        if (isStatic) {
-            cacheConfig(name, config);
+    private static void cacheConfig(Unit unit, String id, FileConfiguration config) {
+        if (unit.isStatic()) {
+            cacheConfig(unit.name(), config);
         } else {
-            cacheConfig(name + "-" + id, config);
+            cacheConfig(unit.name() + "-" + id, config);
         }
     }
 
     /**
-     * Saves static Config
+     * Saves Config in Cache
      * <p/>
-     * @param id
-     * @param config
+     * @param id id of Unit
+     * @param config Configuration that saved current Values of Object
      */
     private static void cacheConfig(String id, FileConfiguration config) {
         if (cache.containsKey(id)) {
@@ -137,22 +160,40 @@ public class YAMLSerialisationHandler implements SerialisationHandler {
         cache.put(id, config);
     }
 
-    private static <T> T toObject(Class<T> c, FileConfiguration config) throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, SerialisationException {
+    /**
+     * Returns an Object of given Class based on Configuration
+     *
+     * @param c Class of the Object
+     * @param config Configuration that saved all Values of Object
+     *
+     * @return Object of given Class
+     *
+     * @throws IllegalAccessException if any access is denied
+     * @throws InvocationTargetException if an Error in the Construcor of the Object occured
+     * @throws SerialisationException if no Object was initiated, caused without an InitiationConstructor or if an InstantiationException is thrown
+     */
+    private static <T> T toObject(Class<T> c, FileConfiguration config) throws SerialisationException, InvocationTargetException, IllegalAccessException {
         T o = null;
-        for (Constructor<?> constr : c.getConstructors()) {
-            if (constr.getAnnotation(InitiationConstructor.class) == null) {
-                continue;
-            }
-            final List<Object> params = new ArrayList<Object>(constr.getParameterTypes().length);
-            for (Class<?> type : constr.getParameterTypes()) {
-                Parameter param = type.getAnnotation(Parameter.class);
-                if (param == null) {
-                    params.add(type.isPrimitive() ? type.newInstance() : null);
+        try {
+            for (Constructor<?> constr : c.getConstructors()) {
+                if (constr.getAnnotation(InitiationConstructor.class) == null) {
                     continue;
                 }
-                params.add(config.get(param.name()));
+                final List<Object> params = new ArrayList<Object>(constr.getParameterTypes().length);
+                for (Class<?> type : constr.getParameterTypes()) {
+                    Parameter param = type.getAnnotation(Parameter.class);
+                    if (param == null) {
+                        params.add(type.isPrimitive() ? type.newInstance() : null);
+                        continue;
+                    }
+                    params.add(type.cast(config.get(param.name())));
+                }
+                o = c.cast(constr.newInstance(params.toArray(new Object[params.size()])));
             }
-            o = c.cast(constr.newInstance(params.toArray(new Object[params.size()])));
+        } catch (InstantiationException ex) {
+            throw new SerialisationException(ex.getLocalizedMessage());
+        } catch (IllegalArgumentException ex) {
+            //Should not be thrown
         }
         if (o == null) {
             throw new SerialisationException("No Object initiated");

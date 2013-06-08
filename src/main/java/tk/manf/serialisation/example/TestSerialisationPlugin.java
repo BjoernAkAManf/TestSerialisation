@@ -7,6 +7,11 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.java.JavaPlugin;
 import tk.manf.serialisation.ObjectSerialiser;
 
+/**
+ * Example Plugin
+ * 
+ * @author Björn 'manf' Heinrichs
+ */
 public class TestSerialisationPlugin extends JavaPlugin {
     private TestEntity entity;
     private ObjectSerialiser serial;

@@ -14,26 +14,38 @@ import tk.manf.serialisation.annotations.Identification;
 import tk.manf.serialisation.handler.SerialisationHandler;
 
 /**
+ * The ObjectSerialiser handles saving and loading of Units.
+ *
+ * @author Björn 'manf' Heinrichs
  * 
- * @author Björn
+ * @see Unit
  */
 public final class ObjectSerialiser {
-    private File dataFolder;
-    //Still don't like SuppressWarnings comparable with Warnings
-    @SuppressWarnings("NonConstantLogger")
-    private final Logger logger;
+    /**
+     * Datafolder of Plugin
+     */
+    private final File dataFolder;
+    /**
+     * Prefix of Plugin
+     */
+    private final String prefix;
+    /**
+     * Default Logger
+     */
+    private static final Logger logger = Logger.getLogger("Minecraft");
 
     /**
      * Initialises Object Serialiser
      * <p/>
-     * @param plugin
+     * @param plugin Plugin for saving and loading Units
      */
     public ObjectSerialiser(JavaPlugin plugin) {
         this.dataFolder = plugin.getDataFolder();
-        this.logger = plugin.getLogger();
+        this.prefix = plugin.getDescription().getPrefix();
     }
 
     /**
+     * Saves given Unit to with SerialisationHandler to memory
      *
      * @param o
      * <p/>
@@ -43,10 +55,11 @@ public final class ObjectSerialiser {
      * @throws SerialisationException
      */
     public void save(Object o) throws IllegalArgumentException, IllegalAccessException, IOException, SerialisationException {
-        save(o, false);
+        save(o, true);
     }
 
     /**
+     * Saves given Unit to with SerialisationHandler to memory
      *
      * @param o
      * @param warn
@@ -61,50 +74,57 @@ public final class ObjectSerialiser {
         if (unit == null) {
             return;
         }
-        SerialisationHandler handler = unit.handler().getHandler();
+        SerialisationHandler handler = unit.type().getHandler();
         String id = null;
         for (Field f : o.getClass().getDeclaredFields()) {
             f.setAccessible(true);
             if (!unit.isStatic() && id == null) {
                 if (f.getAnnotation(Identification.class) != null) {
                     id = f.get(o).toString();
-                    if (!Modifier.isFinal(f.getModifiers())) {
-                        logger.log(Level.INFO, "Identification {0} is not final! NAG Developers", f.getName());
-                    }
+                    warn(warn && !Modifier.isFinal(f.getModifiers()), "Identification {0} is not final! ", f.getName());
                 } else {
                     throw new SerialisationException("Identification not found! Found " + f.getName());
                 }
             }
             Property prop = f.getAnnotation(Property.class);
-            /*
-             * NASTY BLUB CODE - Gonna rewrite this!
-             */
             if (prop == null) {
-                if (warn) {
-                    logger.log(Level.INFO, "Field {0} is no Propertie({1})", new Object[]{f.getName(), f.getClass().getName()});
-                }
+                warn(warn, "Field {0} is no Propertie({1})", f.getName(), f.getClass().getName());
                 continue;
             }
-
-            if (warn) {
-                if (prop.name().length() == 0) {
-                    logger.log(Level.INFO, "Field {0} has no name. Using field name!", f.getName());
-                }
-            }
-            /*
-             * END NASTY CODE
-             */
+            warn(warn && prop.name().length() == 0, "Field {0} has no name. Using field name!", f.getName());
             handler.save(unit, dataFolder, id, prop.name().length() == 0 ? f.getName() : prop.name(), f.get(o));
             f.setAccessible(false);
         }
         handler.save(unit, dataFolder, id);
     }
 
-    public <T> List<T> load(Class<T> type) throws SerialisationException, IllegalAccessException, InstantiationException {
+    /**
+     * Loads all Objects for the given Unit. Static Units only return a List with one Index. Non-Static Units may return alot Unit objects, depending on folder size.
+     *
+     * @param type Units class that should be loaded
+     * @return Unit objects
+     * @throws Exception depending on implementation of SerialisationHandler
+     * @throws SerialisationException if type is no Unit
+     * @see SerialisationHandler
+     */
+    public <T> List<T> load(Class<T> type) throws Exception, SerialisationException {
         Unit unit = type.getAnnotation(Unit.class);
         if (unit == null) {
             throw new SerialisationException("Type is no Unit");
         }
-        return unit.handler().getHandler().load(type, unit, dataFolder);
+        return unit.type().getHandler().load(type, unit, dataFolder);
+    }
+
+    /**
+     * Prints a warning to our Logger if boolean is true
+     *
+     * @param warn if warning is to be printed
+     * @param msg Message that should be printed
+     * @param params parameter to the Message
+     */
+    private void warn(boolean warn, String msg, Object... params) {
+        if (warn) {
+            logger.log(Level.WARNING, "[" + prefix + "] [Serialisation] " + msg, params);
+        }
     }
 }

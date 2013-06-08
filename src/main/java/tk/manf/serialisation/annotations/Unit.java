@@ -6,22 +6,29 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import tk.manf.serialisation.SerialisationType;
 
+/**
+ * Identifies Units
+ * 
+ * @author Björn 'manf' Heinrichs
+ */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Unit {
     /**
-     * 
-     * @return 
+     * Returns Units name
+     * @return Units name
      */
     public String name();
     /**
-     * 
-     * @return 
+     * Returns if this Unit is static
+     * @return true if Unit is Static false if not
      */
     public boolean isStatic() default true;
+    
     /**
-     * 
-     * @return 
+     * Specify Units SerialisationType 
+     * @return SerialisationType of Unit
+     * @see SerialisationType
      */
-    public SerialisationType handler();
+    public SerialisationType type();
 }

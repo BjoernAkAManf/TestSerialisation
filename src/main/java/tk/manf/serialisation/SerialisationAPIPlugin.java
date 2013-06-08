@@ -7,7 +7,7 @@ import tk.manf.serialisation.handler.flatfile.YAMLSerialisationHandler;
 /**
  * Main Plugin
  * <p/>
- * @author Björn
+ * @author Björn 'manf' Heinrichs
  */
 public class SerialisationAPIPlugin extends JavaPlugin {
     /**

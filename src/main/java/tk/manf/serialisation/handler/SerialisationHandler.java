@@ -6,8 +6,9 @@ import java.util.List;
 import tk.manf.serialisation.annotations.Unit;
 
 /**
+ * Interface that must be implemented by any SerialisationHandler
  * 
- * 
+ * @author Björn 'manf' Heinrichs
  */
 public interface SerialisationHandler {
     /**
@@ -30,13 +31,14 @@ public interface SerialisationHandler {
 
     /**
      * Loads current Units from Memory
-     * @param <T>
-     * @param c
-     * @param unit
-     * @param dataFolder
-     * @return
-     * @throws IllegalAccessException
-     * @throws InstantiationException 
+     *
+     * @param c Class of Unit
+     * @param unit Unit
+     * @param dataFolder dataFolder of Plugin#
+     * 
+     * @return all Units
+     * 
+     * @throws Exception Depending on the Implementation any Exception may be thrown
      */
-    public <T> List<T> load(Class<T> c, Unit unit, File dataFolder) throws IllegalAccessException, InstantiationException;
+    public <T> List<T> load(Class<T> c, Unit unit, File dataFolder) throws Exception;
 }

@@ -7,17 +7,18 @@ import tk.manf.serialisation.annotations.InitiationConstructor;
 import tk.manf.serialisation.annotations.Parameter;
 import tk.manf.serialisation.annotations.Unit;
 
-@Unit(isStatic = false, name = "TestEntity", handler = SerialisationType.FLATFILE_YAML)
+/**
+ * Example Unit
+ * 
+ * @author Björn 'manf' Heinrichs
+ */
+@Unit(isStatic = false, name = "TestEntity", type = SerialisationType.FLATFILE_YAML)
 public final class TestEntity {
     @Identification
     @Property
     private final String name;
     @Property
     private int value;
-    
-    /*public TestEntity() {
-        this("");
-    }*/
     
     @InitiationConstructor
     public TestEntity(@Parameter(name = "name") String name) {

@@ -9,8 +9,17 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+/**
+ * Annotation for Parameter of a InitiationConstructor
+ * 
+ * @author Björn 'manf' Heinrichs
+ */
 @Target(ElementType.PARAMETER)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Parameter {
+    /**
+     * Tells which field is set with this Parameter
+     * @return 
+     */
     public String name();
 }
