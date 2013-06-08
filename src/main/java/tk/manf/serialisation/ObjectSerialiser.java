@@ -18,7 +18,7 @@ import tk.manf.serialisation.handler.SerialisationHandler;
  * The ObjectSerialiser handles saving and loading of Units.
  *
  * @author Björn 'manf' Heinrichs
- * 
+ *
  * @see Unit
  */
 public final class ObjectSerialiser {
@@ -43,7 +43,7 @@ public final class ObjectSerialiser {
     public ObjectSerialiser(JavaPlugin plugin) {
         this.dataFolder = plugin.getDataFolder();
         PluginDescriptionFile pdf = plugin.getDescription();
-        this.prefix = pdf.getPrefix()==null ? pdf.getName() : pdf.getPrefix();
+        this.prefix = pdf.getPrefix() == null ? pdf.getName() : pdf.getPrefix();
     }
 
     /**
@@ -115,6 +115,19 @@ public final class ObjectSerialiser {
             throw new SerialisationException("Type is no Unit");
         }
         return unit.type().getHandler().load(type, unit, dataFolder);
+    }
+
+    /**
+     * Loads all Objects for the given Unit. Will only return first Element. Used to get static Object
+     *
+     * @param type Units class that should be loaded
+     * @return Unit objects
+     * @throws Exception depending on implementation of SerialisationHandler
+     * @throws SerialisationException if type is no Unit
+     * @see SerialisationHandler
+     */
+    public <T> T loadStatic(Class<T> type) throws Exception, SerialisationException {
+        return load(type).get(0);
     }
 
     /**
