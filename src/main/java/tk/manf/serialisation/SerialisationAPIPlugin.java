@@ -21,5 +21,6 @@ public class SerialisationAPIPlugin extends JavaPlugin {
     @Override
     public void onEnable() {
         SerialisationType.FLATFILE_YAML.setSerialisationHandler(new YAMLSerialisationHandler(3));
+        getLogger().info("Loaded Serialisation Handler");
     }
 }

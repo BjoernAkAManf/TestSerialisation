@@ -48,6 +48,7 @@ public class YAMLSerialisationHandler implements SerialisationHandler {
     public void save(Unit unit, File folder, String id) throws IOException {
         FileConfiguration config = loadConfig(unit, folder, id);
         File f = new File(folder, unit.name());
+        f.getParentFile().mkdirs();
         if (!unit.isStatic()) {
             f = new File(f, id);
         }
@@ -90,6 +91,7 @@ public class YAMLSerialisationHandler implements SerialisationHandler {
             tmp.add(toObject(c, loadConfig(unit, folder, null)));
         } else {
             final File saves = new File(folder, unit.name());
+            saves.mkdirs();
             tmp = new ArrayList<T>(saves.listFiles().length);
             for (File f : saves.listFiles()) {
                 tmp.add(toObject(c, loadConfig(folder, f.getName(), unit.name())));
