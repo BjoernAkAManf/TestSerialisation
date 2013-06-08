@@ -2,6 +2,7 @@ package tk.manf.serialisation.handler.flatfile;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -94,7 +95,7 @@ public class YAMLSerialisationHandler implements SerialisationHandler {
             saves.mkdirs();
             tmp = new ArrayList<T>(saves.listFiles().length);
             for (File f : saves.listFiles()) {
-                tmp.add(toObject(c, loadConfig(folder, f.getName(), unit.name())));
+                tmp.add(toObject(c, loadConfig(unit, folder, f.getName())));
             }
         }
         return tmp;
@@ -182,13 +183,22 @@ public class YAMLSerialisationHandler implements SerialisationHandler {
                     continue;
                 }
                 final List<Object> params = new ArrayList<Object>(constr.getParameterTypes().length);
+                int i = 0;
                 for (Class<?> type : constr.getParameterTypes()) {
-                    Parameter param = type.getAnnotation(Parameter.class);
+                    Annotation[] annotations = constr.getParameterAnnotations()[i];
+                    Parameter param = null;
+                    for(Annotation a:annotations) {
+                        if(a.annotationType() == Parameter.class) {
+                            param = (Parameter) a;
+                            break;
+                        }
+                    }
                     if (param == null) {
                         params.add(type.isPrimitive() ? type.newInstance() : null);
                         continue;
                     }
                     params.add(type.cast(config.get(param.name())));
+                    i++;
                 }
                 o = c.cast(constr.newInstance(params.toArray(new Object[params.size()])));
             }
