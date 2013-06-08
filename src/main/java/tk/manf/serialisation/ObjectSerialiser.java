@@ -9,6 +9,7 @@ import java.lang.reflect.Modifier;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.java.JavaPlugin;
 import tk.manf.serialisation.annotations.Identification;
 import tk.manf.serialisation.handler.SerialisationHandler;
@@ -41,7 +42,8 @@ public final class ObjectSerialiser {
      */
     public ObjectSerialiser(JavaPlugin plugin) {
         this.dataFolder = plugin.getDataFolder();
-        this.prefix = plugin.getDescription().getPrefix();
+        PluginDescriptionFile pdf = plugin.getDescription();
+        this.prefix = pdf.getPrefix()==null ? pdf.getName() : pdf.getPrefix();
     }
 
     /**
