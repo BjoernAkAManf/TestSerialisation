@@ -109,7 +109,7 @@ public final class ObjectSerialiser {
      * @throws SerialisationException if type is no Unit
      * @see SerialisationHandler
      */
-    public <T> List<T> load(Class<T> type) throws Exception, SerialisationException {
+    public <T> List<T> load(Class<T> type) throws Exception {
         Unit unit = type.getAnnotation(Unit.class);
         if (unit == null) {
             throw new SerialisationException("Type is no Unit");
@@ -126,7 +126,7 @@ public final class ObjectSerialiser {
      * @throws SerialisationException if type is no Unit
      * @see SerialisationHandler
      */
-    public <T> T loadStatic(Class<T> type) throws Exception, SerialisationException {
+    public <T> T loadStatic(Class<T> type) throws Exception {
         return load(type).get(0);
     }
 
